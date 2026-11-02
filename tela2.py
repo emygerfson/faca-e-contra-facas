@@ -1,5 +1,7 @@
 import os
+import shutil
 import sqlite3
+import sys
 from contextlib import contextmanager
 from decimal import Decimal, InvalidOperation
 from tkinter import *
@@ -20,8 +22,19 @@ COR_CADASTRAR = "#bdd7ee"
 COR_EDITAR = "#ffc000"
 COR_EXCLUIR = "#ff0000"
 
-# Caminho do banco de dados SQLite
-DB_PATH = os.path.join(os.path.dirname(__file__), "controle_facas.db")
+# O executável guarda o banco em uma pasta persistente, fora do arquivo temporário do PyInstaller.
+if getattr(sys, "frozen", False):
+    diretorio_dados = os.path.join(
+        os.environ.get("LOCALAPPDATA", os.path.expanduser("~")),
+        "ControleFacas",
+    )
+    os.makedirs(diretorio_dados, exist_ok=True)
+    DB_PATH = os.path.join(diretorio_dados, "controle_facas.db")
+    banco_inicial = os.path.join(getattr(sys, "_MEIPASS", os.path.dirname(sys.executable)), "controle_facas.db")
+    if not os.path.exists(DB_PATH) and os.path.isfile(banco_inicial):
+        shutil.copy2(banco_inicial, DB_PATH)
+else:
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "controle_facas.db")
 
 
 @contextmanager
